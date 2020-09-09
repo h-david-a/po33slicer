@@ -1,0 +1,276 @@
+<html>
+<head>
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700" rel="stylesheet">
+	<title>PO-33 Drum Layer Slicer</title>
+	<link rel="stylesheet" href="slider.css" />
+	<link rel="stylesheet" href="main.css" />
+	<script src="jquery-3.3.1.js"></script>
+  <link rel="stylesheet" href="jquery-ui.css">
+  <link rel="stylesheet" href="jquery-ui.structure.css">
+  <link rel="stylesheet" href="jquery-ui.theme.css">
+  <script src="jquery-ui.js"></script>
+</head>
+<body>
+<div id="player" class="intro">
+	<div class="line">
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button" id="record"></div>
+	</div>
+	<br clear="left"/>
+	<div class="line">
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+	</div>
+	<br clear="left"/>
+	<div class="line">
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button" id="play"></div>
+	</div>
+	<br clear="left"/>
+	<div class="line">
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+		<div class="button grid" id="write"></div>
+	</div>
+</div>
+
+<div id="control">
+	<div id="files"></div>
+	<br clear="all" />
+	<br clear="all" />
+	<br clear="all" />
+
+	<div class="upload-btn-wrapper">
+		<button class="btn">Upload drum sounds</button>
+		<input  id="audioFileChooser" type="file" onchange="readFiles(this.files);" multiple />
+	</div>
+
+	<br/>
+	<br/>
+	<input id="stepLength" type="range" min="0" max="1000" value="300" oninput="updateStep($(this).val())"><br/>
+	<label for="stepLength">Step length <b><span id="length">300</span></b> ms</label>
+</div>
+
+<div id="howto">
+	<h1>How to use</h1>
+	<ol>
+		<li>Upload some drum sound files</li>
+		<li>Drag the sounds to the step-buttons</li>
+		<li>Drag multiple sounds to one step to combine</li>
+		<li>optional: set step length</li>
+		<li>Connect your PO-33 to your audio output</li>
+		<li>Press <b>play</b> on the simulator to export to your PO-33</li>
+		<li>Hold <b>record</b> and the slot number on your PO</li>
+		<li>Coming soon: Use the simulator's write button to export a .WAV for later use</li>
+		<li>Start jamming!</li>
+	</ol>
+	<h2>Ways to record</h2>
+	<ol>
+		<li>Record to drum slot
+		<br/>This way your PO tries to find pauses between the sounds, to split it between the 16 sounds</li><br/>
+		<li>Record to melodic slot, then copy (recommended)
+		<br/>The sample is recorded as one to a melodic slot, once you copy it to a drum slot, it gets sliced automatically. It is divided into 16 equally long subsamples.</p>
+		<p>Just use the play-progress bar for orientation</p></li>
+	</ol>
+</div>
+
+<script>
+  var file_data = {};
+	var mix_data = null;
+	var max_length;
+	var step_length = 300;
+
+	function allowDrop(ev) {
+	  ev.preventDefault();
+	}
+
+	function updateStep(value){
+		$('#length').text(value);
+		step_length = value;
+	}
+
+	function drag(ev) {
+		console.log("Drag: ")
+		console.log(ev)
+		if(ev.explicitOriginalTarget)
+	  	ev.dataTransfer.setData("files", ev.explicitOriginalTarget.data);
+		else
+			ev.dataTransfer.setData("files", $(ev.srcElement).data('items'));
+	}
+
+	function drop(ev) {
+		console.log('Drop: ');
+		console.log(ev);
+	  ev.preventDefault();
+	  var add = ev.dataTransfer.getData("files");
+		var data = $(ev.target).data('sounds');
+		if(typeof data === 'undefined')
+			data = [];
+		else
+			data = data.split(',');
+		if(data.indexOf(add) != -1)
+		  data.splice(data.indexOf(add), 1)
+		else
+			data.push(add);
+		data = data.join(',');
+	  $(ev.target).data('sounds', data);
+	  $(ev.target).prop('title', data);
+		$(ev.target).html("<span style='margin-top: 30px'>" + data.split(',').length + "</span>");
+	}
+
+	function copyBuffer(src)  {
+	    var dst = new ArrayBuffer(src.byteLength);
+	    new Uint8Array(dst).set(new Uint8Array(src));
+	    return dst;
+	}
+
+	function dec2bin(dec){
+    return (dec >>> 0).toString(2);
+}
+
+	function readFile(file) {
+		var fileReader = new FileReader();
+			fileReader.readAsArrayBuffer(file);
+			fileReader.onload = function(e) {
+				file_data[file.name] = e.target.result;
+//				playAudioFile(e.target.result);
+				console.log(("Filename: '" + file.name + "'"), ( "(" + ((Math.floor(file.size/1024/1024*100))/100) + " MB)" ));
+				var x = "<div class='sound' draggable='true' ondragstart='drag(event)' data-items='"+file.name+"' title='"+file.name+"'>"+file.name.split('.')[0]+"</div>";
+				$('#files').append(x);
+			}
+	}
+
+	function readFiles(files){
+		for(var i in files){
+			readFile(files[i]);
+		}
+	}
+
+	function playAudioFile(file_name) {
+		var file = file_data[file_name];
+		var copy = copyBuffer(file);
+		var context = new window.AudioContext();
+			context.decodeAudioData(file, function(buffer) {
+				var source = context.createBufferSource();
+					source.buffer = buffer;
+					source.loop = false;
+					source.connect(context.destination);
+					source.start(0);
+					file_data[file_name] = copy;
+			});
+	}
+
+	function playMultiple(file_names) {
+		var buffers = []
+		for(var file in file_names){
+			console.log('File ' + file_names[file])
+			file = file_data[file_names[file]];
+			var copy = copyBuffer(file);
+			buffers.push(copy);
+		}
+		var context = new window.AudioContext();
+
+		for(var i in buffers){
+			var file = buffers[i];
+			context.decodeAudioData(file, function(buffer) {
+				var source = context.createBufferSource();
+					source.buffer = buffer;
+					source.loop = false;
+					source.connect(context.destination);
+					source.start(0);
+			});
+		}
+	}
+
+function playDelayed(items, delay, i){
+	window.setTimeout(function(){
+		if(items)
+			playMultiple(items);
+		$( "#progressbar" ).progressbar({
+      value: i * (100.0 / 16)
+    });
+	}, delay);
+}
+
+	function playAll(){
+		for(var i in mix_data){
+			var delay = i * step_length;
+			var y = mix_data[i];
+			console.log('Mix: ' + i + ' / ' + y + ' / ' + delay);
+				playDelayed(y, delay, i);
+		}
+	};
+
+	function startCountdown(seconds, callback){
+
+		$('#countdown').show().text(seconds).removeClass('inactive');
+		if(seconds == 0){
+			callback();
+		}
+		else
+			window.setTimeout(function(){ startCountdown(seconds - 1, callback)}, 1000)
+	}
+
+	function playSteps(){
+		$( "#progressbar" ).fadeIn().progressbar({
+      value: 0
+    });
+			$('#player .button.grid').each(function(i, e){
+				var delay = i * step_length;
+				var y = $(e).data('sounds');
+				if(y)
+					playDelayed(y.split(','), delay, i);
+				else
+					playDelayed(false, delay, i);
+			});
+
+			window.setTimeout(function(){
+					$( "#progressbar" ).fadeOut();
+					$('#countdown').fadeOut().addClass('inactive');
+
+			}, step_length * 16 + 3000)
+	}
+
+	$(document).ready(function(){
+		$(document).on('click', '.sound', function(){
+			console.log('Click: ' + this);
+			playAudioFile($(this).data('items'))
+		});
+
+		$(document).on('dblclick', '.line div.button.grid', function(){
+
+		});
+		$(document).on('click', '.line div.button.grid', function(){
+			console.log('Click button: ' + this);
+			var files = $(this).data('sounds').split(',');
+			console.log(files)
+			playMultiple(files)
+		});
+
+		$('#play').click(function(){
+			startCountdown(3,	playSteps);
+		});
+
+		$('#record').click(function(){
+			$('#audioFileChooser').trigger('click')
+		});
+
+		$('#player').removeClass('intro');
+
+	});
+</script>
+<div id="countdown" class="inactive"></div>
+<div id="progressbar"></div>
+<div id="disclaimer">Made with love by <a href="https://www.twitter.com/ulfster" style="color: #e74423">@ulfster</a> &copy; 2019</div>
+</body>
+</html>

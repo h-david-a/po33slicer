@@ -1,0 +1,159 @@
+
+body {
+	padding: 0px;
+	margin: 0px;
+	background-color: grey;
+	font-family: 'Roboto Condensed', sans-serif;
+}
+
+#countdown .inactive{
+	font-size: 1em;
+}
+#countdown {
+	display: none;
+	position:absolute;
+	font-size: 24em;
+	font-weight: bold;
+	color: #e74423;
+	text-align: center;
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+	bottom: 50px;
+	-webkit-transition: font-size 1.8s ease-in-out;
+	transition: font-size 1.8s ease-in-out;
+}
+#disclaimer{
+  position: absolute;
+	right: 5px;
+	bottom: 5px;
+}
+
+#progressbar{
+	display:none;
+	position:absolute;
+	bottom: 40px;
+	width: 90%;
+	margin-left: 5%;
+	margin-right: 5%;
+	text-align: center;
+}
+
+#progressbar .ui-progressbar-value {
+    background-color: #e74423;
+  }
+
+#control {
+	float: right;
+}
+
+#howto {
+	float: left;
+	padding: 20px;
+	font-size: 1.6em;
+	width: 600px;
+}
+
+#player {
+	width: 890px;
+//	height: 800px;
+height: 100%;
+	float: right;
+	background-image: url(bg.jpg);
+	background-position: -510px -1100px;
+	background-repeat: no-repeat;
+	padding-top: 30px;
+	-webkit-transition: background-position 1.8s ease-in-out;
+	transition: background-position 1.8s ease-in-out;
+}
+
+h1 {
+		margin-top: 0px;
+}
+
+#player.intro {
+	background-position: -510px 0px;
+	height: 100%;
+}
+
+#player div.line{
+	float:left;
+	//border: 1px solid yellow;
+	height: 187px;
+	width: 884px;
+}
+
+#player div.button {
+	//border: 1px solid green;
+	float: left;
+	width: 92px;
+	height: 93px;
+	margin-left: 74px;
+	text-align: right;
+	color: white;
+	cursor: 'pointer';
+}
+
+#player div.button:hover {
+	cursor: 'pointer';
+	background-image: url(red.png);
+	background-position: 17px 16px;
+	background-repeat: no-repeat;
+}
+#player div.button.active {
+	cursor: 'pointer';
+	background-image: url(red.png);
+	background-position: 17px 16px;
+	background-repeat: no-repeat;
+}
+
+#player div.line div.button:first {
+	margin-left: 0px;
+}
+
+#files {
+	width: 300px;
+}
+.sound {
+		float: left;
+		width: 60px;
+		height: 60px;
+		border: 1px solid black;
+		background-color: white;
+		margin-right: 5px;
+		padding: 5px;
+		font-size: 0.8em;
+		margin-bottom: 5px;
+		cursor: pointer;
+		white-space: nowrap;
+  overflow: hidden;
+		text-overflow: ellipsis;
+}
+
+#control {
+	padding: 20px;
+
+}
+.upload-btn-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.btn {
+  border: 2px solid gray;
+  color: black;
+  background-color: white;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.upload-btn-wrapper input[type=file] {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
